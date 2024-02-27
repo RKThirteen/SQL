@@ -1,0 +1,1476 @@
+CREATE SEQUENCE id_generator
+INCREMENT BY 1
+START WITH 1
+MINVALUE 1
+MAXVALUE 100
+CYCLE
+NOCACHE
+ORDER;
+
+CREATE SEQUENCE id_generator_1
+INCREMENT BY 1
+START WITH 1
+MINVALUE 1
+MAXVALUE 100
+CYCLE
+NOCACHE
+ORDER;
+
+CREATE SEQUENCE id_generator_2
+INCREMENT BY 1
+START WITH 1
+MINVALUE 1
+MAXVALUE 100
+CYCLE
+NOCACHE
+ORDER;
+
+CREATE SEQUENCE id_generator_3
+INCREMENT BY 1
+START WITH 1
+MINVALUE 1
+MAXVALUE 100
+CYCLE
+NOCACHE
+ORDER;
+
+DROP SEQUENCE id_generator; --pentru a scapa de secvente
+DROP SEQUENCE id_generator_1;
+DROP SEQUENCE id_generator_2;
+DROP SEQUENCE id_generator_3;
+
+
+CREATE TABLE job(
+id_job NUMBER(4),
+nume_job VARCHAR2(30),
+salariu_minim NUMBER(7) DEFAULT 4000,
+CONSTRAINT pk_job PRIMARY KEY(id_job),
+CONSTRAINT cq_salariu CHECK(salariu_minim>=4000),
+CONSTRAINT uq_nume UNIQUE(nume_job)
+);
+
+DROP TABLE job;
+DESC job;
+
+BEGIN
+INSERT INTO job(id_job,nume_job,salariu_minim) VALUES(id_generator.NEXTVAL,'Manager',15000);
+INSERT INTO job(id_job,nume_job,salariu_minim) VALUES(id_generator.NEXTVAL,'Pilot',5000);
+INSERT INTO job(id_job,nume_job,salariu_minim) VALUES(id_generator.NEXTVAL,'Dispecer_zbor',8500);
+INSERT INTO job(id_job,nume_job,salariu_minim) VALUES(id_generator.NEXTVAL,'Tehnician',8700);
+INSERT INTO job(id_job,nume_job,salariu_minim) VALUES(id_generator.NEXTVAL,'Copilot',4000);
+INSERT INTO job(id_job,nume_job) VALUES(id_generator.NEXTVAL,'Casier');
+INSERT INTO job(id_job,nume_job) VALUES(id_generator.NEXTVAL,'Agent_servicii');
+END;
+/
+
+SELECT * FROM job;
+
+CREATE TABLE locatie(
+id_locatie NUMBER(4),
+nume_locatie VARCHAR2(30) NOT NULL,
+CONSTRAINT pk_locatie PRIMARY KEY(id_locatie)
+);
+
+DROP TABLE locatie;
+DESC locatie;
+/
+BEGIN
+INSERT INTO locatie(id_locatie,nume_locatie) VALUES(id_generator.NEXTVAL,'Bucuresti');
+INSERT INTO locatie(id_locatie,nume_locatie) VALUES(id_generator.NEXTVAL,'Cluj-Napoca');
+INSERT INTO locatie(id_locatie,nume_locatie) VALUES(id_generator.NEXTVAL,'Amsterdam');
+INSERT INTO locatie(id_locatie,nume_locatie) VALUES(id_generator.NEXTVAL,'Paris');
+INSERT INTO locatie(id_locatie,nume_locatie) VALUES(id_generator.NEXTVAL,'Roma');
+END;
+/
+SELECT * FROM locatie;
+
+CREATE TABLE aeroport(
+id_aeroport NUMBER(4),
+nume VARCHAR2(40) NOT NULL,
+id_locatie NUMBER(4) NOT NULL,
+CONSTRAINT pk_aeroport PRIMARY KEY(id_aeroport),
+CONSTRAINT fk_locatie_aeroport FOREIGN KEY(id_locatie) REFERENCES locatie(id_locatie)
+);
+
+DROP TABLE aeroport;
+DESC aeroport;
+
+INSERT INTO aeroport(id_aeroport, nume, id_locatie) VALUES(id_generator.NEXTVAL,'Cluj-Napoca Aeroport', (SELECT id_locatie
+FROM locatie
+WHERE nume_locatie='Cluj-Napoca'));
+
+INSERT INTO aeroport(id_aeroport, nume, id_locatie) VALUES(id_generator.NEXTVAL,'Cluj-Napoca Zboruri', (SELECT id_locatie
+FROM locatie
+WHERE nume_locatie='Cluj-Napoca'));
+
+INSERT INTO aeroport(id_aeroport, nume, id_locatie) VALUES(id_generator.NEXTVAL,'Aeroportul International Henri Coanda', (SELECT id_locatie
+FROM locatie
+WHERE nume_locatie='Bucuresti'));
+
+INSERT INTO aeroport(id_aeroport, nume, id_locatie) VALUES(id_generator.NEXTVAL,'Amsterdam Flights', (SELECT id_locatie
+FROM locatie
+WHERE nume_locatie='Amsterdam'));
+
+INSERT INTO aeroport(id_aeroport, nume, id_locatie) VALUES(id_generator.NEXTVAL,'Aeroportul Otopeni', (SELECT id_locatie
+FROM locatie
+WHERE nume_locatie='Bucuresti'));
+
+INSERT INTO aeroport(id_aeroport, nume, id_locatie) VALUES(id_generator.NEXTVAL,'Noul Aeroport Cotroceni', (SELECT id_locatie
+FROM locatie
+WHERE nume_locatie='Bucuresti'));
+
+INSERT INTO aeroport(id_aeroport, nume, id_locatie) VALUES(id_generator.NEXTVAL,'Aeroport Eiffel', (SELECT id_locatie
+FROM locatie
+WHERE nume_locatie='Paris'));
+
+INSERT INTO aeroport(id_aeroport, nume, id_locatie) VALUES(id_generator.NEXTVAL,'Rome Airport', (SELECT id_locatie FROM locatie WHERE nume_locatie='Roma'));
+
+SELECT * FROM aeroport;
+
+CREATE TABLE angajat(
+id_angajat NUMBER(4),
+nume VARCHAR2(20) NOT NULL,
+prenume VARCHAR2(20) NOT NULL,
+email varchar2(30) NOT NULL,
+data_angajarii DATE DEFAULT SYSDATE,
+id_job NUMBER(4),
+id_aeroport NUMBER(4),
+salariu NUMBER(7),
+CONSTRAINT pk_angajat PRIMARY KEY(id_angajat),
+CONSTRAINT fk_job_angajat FOREIGN KEY(id_job) REFERENCES job(id_job),
+CONSTRAINT fk_aeroport_angajat FOREIGN KEY(id_aeroport) REFERENCES aeroport(id_aeroport),
+CONSTRAINT uq_email UNIQUE(email)
+);
+
+
+DROP TABLE angajat;
+DESC angajat;
+/
+BEGIN
+INSERT INTO angajat(id_angajat,nume,prenume,email,salariu) VALUES(id_generator.NEXTVAL,'Popescu','Ion','popescu.ion@yahoo.com',4000);
+
+INSERT INTO angajat(id_angajat,nume,prenume,email,data_angajarii,salariu) VALUES(id_generator.NEXTVAL,'Ionescu','Alexandru','alnescu@yahoo.com',TO_DATE('09-02-2010','dd-mm-yyyy'),5000);
+
+INSERT INTO angajat(id_angajat,nume,prenume,email,data_angajarii,id_job,id_aeroport,salariu) 
+VALUES(id_generator.NEXTVAL,'Georgescu','Alina','georgescualina@yahoo.com',TO_DATE('10-10-2003','dd-mm-yyyy'),(SELECT id_job
+FROM job
+WHERE nume_job='Pilot'),13,5000);
+
+INSERT INTO angajat(id_angajat,nume,prenume,email,data_angajarii,id_job,id_aeroport,salariu) 
+VALUES(id_generator.NEXTVAL,'Munteanu','George','georgemtn@yahoo.com',TO_DATE('20-04-2005','dd-mm-yyyy'),(SELECT id_job
+FROM job
+WHERE nume_job='Manager'),14,23000);
+
+INSERT INTO angajat(id_angajat,nume,prenume,email,data_angajarii,id_job,id_aeroport,salariu) 
+VALUES(id_generator.NEXTVAL,'Barbu','Andrei','eduard.barbu@yahoo.com',TO_DATE('02-09-2003','dd-mm-yyyy'),(SELECT id_job
+FROM job
+WHERE nume_job='Manager'),15,15000);
+
+INSERT INTO angajat(id_angajat, nume, prenume, email, id_aeroport, id_job) VALUES(id_generator.NEXTVAL,'Andurnache', 'Alexandru','aalexandru@yahoo.com', 
+(SELECT id_aeroport FROM aeroport WHERE nume='Aeroportul International Henri Coanda'),
+(SELECT id_job
+FROM job
+WHERE nume_job='Copilot'));
+
+INSERT INTO angajat(id_angajat, nume, prenume, email, id_aeroport, id_job) VALUES(id_generator.NEXTVAL,'Alexandru', 'Andrei','andalexandru@yahoo.com', (SELECT id_aeroport FROM aeroport WHERE nume='Aeroportul Otopeni'),(SELECT id_job
+FROM job
+WHERE nume_job='Copilot'));
+
+INSERT INTO angajat(id_angajat, nume, prenume, email, id_aeroport, id_job) VALUES(id_generator.NEXTVAL,'Andrei', 'Marcel','andreimarcel@yahoo.com', (SELECT id_aeroport FROM aeroport WHERE nume='Aeroportul Otopeni'),(SELECT id_job
+FROM job
+WHERE nume_job='Copilot'));
+
+INSERT INTO angajat(id_angajat, nume, prenume, email, id_aeroport, salariu) VALUES(300,'Popescu','George','popgeorge@gmail.com',(SELECT id_aeroport FROM aeroport WHERE nume='Aeroportul Otopeni'),7000);
+INSERT INTO angajat(id_angajat, nume, prenume, email, id_aeroport, salariu) VALUES(301,'Popescu','Ana','popanag@gmail.com',(SELECT id_aeroport FROM aeroport WHERE nume='Aeroportul Otopeni'),8000);
+INSERT INTO angajat(id_angajat, nume, prenume, email, id_aeroport, id_job, salariu) VALUES(302,'Popescu','Gheorghe','popgeorge1@gmail.com',(SELECT id_aeroport FROM aeroport WHERE nume='Aeroportul Otopeni'),(SELECT id_job
+FROM job
+WHERE nume_job='Copilot'),7000);
+END;
+/
+
+SELECT * FROM angajat;
+
+
+CREATE TABLE campanie(
+id_campanie NUMBER(4),
+data_start DATE NOT NULL,
+data_sfarsit DATE NOT NULL,
+beneficii varchar2(25) DEFAULT 'Promovare Firma',
+CONSTRAINT pk_campanie PRIMARY KEY(id_campanie),
+CONSTRAINT chq_data CHECK(data_start+20<data_sfarsit)
+);
+
+DESC campanie;
+DROP TABLE campanie;
+/
+BEGIN
+INSERT INTO campanie(id_campanie,data_start,data_sfarsit) VALUES(id_generator_1.NEXTVAL,TO_DATE('24-08-2012','dd-mm-yyyy'),TO_DATE('25-09-2012','dd-mm-yyyy'));
+INSERT INTO campanie(id_campanie,data_start,data_sfarsit) VALUES(id_generator_1.NEXTVAL,TO_DATE('24-08-2005','dd-mm-yyyy'),TO_DATE('25-09-2006','dd-mm-yyyy'));
+INSERT INTO campanie(id_campanie,data_start,data_sfarsit,beneficii) VALUES(id_generator_1.NEXTVAL,TO_DATE('13-12-2013','dd-mm-yyyy'),TO_DATE('01-03-2014','dd-mm-yyyy'),'Reducere Bilete');
+INSERT INTO campanie(id_campanie,data_start,data_sfarsit,beneficii) VALUES(id_generator_1.NEXTVAL,TO_DATE('24-08-2012','dd-mm-yyyy'),TO_DATE('25-09-2012','dd-mm-yyyy'),'Reducere Bilete');
+INSERT INTO campanie(id_campanie,data_start,data_sfarsit) VALUES(id_generator_1.NEXTVAL,TO_DATE('02-01-2020','dd-mm-yyyy'),TO_DATE('04-04-2021','dd-mm-yyyy'));
+END;
+/
+SELECT * FROM campanie;
+
+CREATE TABLE certificat(
+id_certificat NUMBER(4),
+data_primirii DATE NOT NULL,
+id_angajat NUMBER(4) NOT NULL,
+id_campanie NUMBER(4) NOT NULL,
+CONSTRAINT pk_certificat PRIMARY KEY(id_certificat),
+CONSTRAINT fk_certificat_angajat FOREIGN KEY(id_angajat) REFERENCES angajat(id_angajat),
+CONSTRAINT fk_certificat_campanie FOREIGN KEY(id_campanie) REFERENCES campanie(id_campanie)
+);
+
+DESC certificat;
+DROP TABLE certificat;
+INSERT INTO certificat(id_certificat,data_primirii,id_angajat,id_campanie) VALUES(id_generator.NEXTVAL,TO_DATE('10-10-2004','dd-mm-yyyy'),(SELECT id_angajat
+                                                                                                                               FROM angajat
+                                                                                                                               WHERE nume='Barbu'
+                                                                                                                               AND prenume='Andrei'),5
+                                                                                                                               );
+INSERT INTO certificat(id_certificat,data_primirii,id_angajat,id_campanie) VALUES(id_generator.NEXTVAL,TO_DATE('10-10-2005','dd-mm-yyyy'),(SELECT id_angajat
+                                                                                                                               FROM angajat
+                                                                                                                               WHERE nume='Barbu'
+                                                                                                                               AND prenume='Andrei'),5
+                                                                                                                               );
+INSERT INTO certificat(id_certificat,data_primirii,id_angajat,id_campanie) VALUES(id_generator.NEXTVAL,TO_DATE('10-10-2006','dd-mm-yyyy'),(SELECT id_angajat
+                                                                                                                               FROM angajat
+                                                                                                                               WHERE nume='Barbu'
+                                                                                                                               AND prenume='Andrei'),5
+                                                                                                                               );
+INSERT INTO certificat(id_certificat,data_primirii,id_angajat,id_campanie) VALUES(id_generator.NEXTVAL,TO_DATE('25-08-2011','dd-mm-yyyy'),(SELECT id_angajat
+                                                                                                                               FROM angajat
+                                                                                                                               WHERE nume='Munteanu'
+                                                                                                                               AND prenume='George'),5
+                                                                                                                               );
+INSERT INTO certificat(id_certificat,data_primirii,id_angajat,id_campanie) VALUES(id_generator.NEXTVAL,TO_DATE('12-07-2012','dd-mm-yyyy'),(SELECT id_angajat
+                                                                                                                               FROM angajat
+                                                                                                                               WHERE nume='Popescu'
+                                                                                                                               AND prenume='Ion'),5
+                                                                                                                               );
+SELECT * FROM certificat;
+
+CREATE TABLE pasager(
+CNP char(13),
+nume varchar2(20),
+prenume varchar2(20),
+email varchar2(40),
+CONSTRAINT pk_pasager PRIMARY KEY(CNP),
+CONSTRAINT uq_email_pasager UNIQUE(EMAIL)
+);
+
+DESC pasager;
+DROP table pasager;
+/
+BEGIN
+INSERT INTO pasager(CNP) VALUES('5030802385555');
+INSERT INTO pasager(CNP,nume,prenume) VALUES('5030902385554','Talmaciu', 'Marian');
+INSERT INTO pasager(CNP,nume,prenume) VALUES('5041002385553', 'Popescu' , 'Eduard');
+INSERT INTO pasager(CNP,nume,prenume,email) VALUES('5120897385552' , 'Eftimie' ,'Andrei', 'efandr@yahoo.com');
+INSERT INTO pasager(CNP,nume,prenume,email) VALUES('5110805385551','Eftimie', 'Gabriel', 'efgabriel@yahoo.com');
+END;
+/
+SELECT * from pasager;
+
+CREATE TABLE abonament(
+id_abonament NUMBER(4),
+puncte NUMBER(5) DEFAULT 0,
+CNP CHAR(13) NOT NULL,
+CONSTRAINT pk_abonament PRIMARY KEY(id_abonament),
+CONSTRAINT fk_abonament_pasager FOREIGN KEY(CNP) REFERENCES pasager(CNP),
+CONSTRAINT uq_abonament UNIQUE(CNP),
+CONSTRAINT cq_puncte CHECK(puncte>=0)
+);
+
+DESC abonament;
+DROP table abonament;
+/
+BEGIN
+INSERT INTO abonament(id_abonament, CNP) VALUES(id_generator.NEXTVAL,'5030902385554');
+INSERT INTO abonament(id_abonament, CNP) VALUES(id_generator.NEXTVAL,'5030802385555');
+INSERT INTO abonament(id_abonament, CNP) VALUES(id_generator.NEXTVAL,'5041002385553');
+INSERT INTO abonament(id_abonament, CNP) VALUES(id_generator.NEXTVAL,'5120897385552');
+INSERT INTO abonament(id_abonament, puncte, CNP) VALUES(id_generator.NEXTVAL,40,'5110805385551');
+END;
+/
+SELECT * FROM abonament;
+
+CREATE TABLE model_avion(
+tip_avion varchar2(25) NOT NULL,
+intretinere NUMBER(5) DEFAULT 1000,
+nr_locuri NUMBER(5) NOT NULL,
+CONSTRAINT pk_model_avion PRIMARY KEY(tip_avion),
+CONSTRAINT chq_locuri CHECK(nr_locuri>10),
+CONSTRAINT cq_intretinere CHECK(intretinere>=100)
+);
+
+DESC model_avion;
+DROP table model_avion;
+BEGIN
+INSERT INTO model_avion(tip_avion,nr_locuri) VALUES('F777',100);
+INSERT INTO model_avion(tip_avion,nr_locuri) VALUES('Boeing 757',150);
+INSERT INTO model_avion(tip_avion,nr_locuri,intretinere) VALUES('Airbus A320',200,500);
+INSERT INTO model_avion(tip_avion,nr_locuri,intretinere) VALUES('Airbus A120',200,1500);
+INSERT INTO model_avion(tip_avion,nr_locuri,intretinere) VALUES('Boeing 717',200,1200);
+END;
+/
+
+SELECT * FROM model_avion;
+
+CREATE TABLE avion(
+id_avion NUMBER(4),
+data_reviziei DATE DEFAULT SYSDATE,
+tip_avion varchar2(25),
+CONSTRAINT pk_avion PRIMARY KEY (id_avion),
+CONSTRAINT fk_avion FOREIGN KEY (tip_avion) REFERENCES model_avion(tip_avion) 
+);
+
+DESC avion;
+DROP table avion;
+/
+BEGIN
+INSERT INTO avion(id_avion,data_reviziei,tip_avion) VALUES(id_generator_2.NEXTVAL,TO_DATE('09-09-2017','dd-mm-yyyy'),'F777');
+INSERT INTO avion(id_avion,data_reviziei,tip_avion) VALUES(id_generator_2.NEXTVAL,TO_DATE('09-09-2017','dd-mm-yyyy'),'F777');
+INSERT INTO avion(id_avion,data_reviziei,tip_avion) VALUES(id_generator_2.NEXTVAL,TO_DATE('08-09-2016','dd-mm-yyyy'),'Boeing 717');
+INSERT INTO avion(id_avion,data_reviziei,tip_avion) VALUES(id_generator_2.NEXTVAL,TO_DATE('07-11-2018','dd-mm-yyyy'),'Boeing 757');
+INSERT INTO avion(id_avion,data_reviziei,tip_avion) VALUES(id_generator_2.NEXTVAL,TO_DATE('12-12-2017','dd-mm-yyyy'),'Airbus A120');
+INSERT INTO avion(id_avion,data_reviziei,tip_avion) VALUES(id_generator_2.NEXTVAL,TO_DATE('27-10-2020','dd-mm-yyyy'),'Airbus A320');
+INSERT INTO avion(id_avion,data_reviziei,tip_avion) VALUES(id_generator_2.NEXTVAL,TO_DATE('09-SEP-2021','dd-mm-yyyy'),'F777');
+END;
+/
+SELECT * FROM avion;
+
+CREATE TABLE calatorie(
+id_calatorie NUMBER(4),
+durata_ore NUMBER(5,2) DEFAULT 2,
+data_plecarii DATE DEFAULT SYSDATE,
+id_aeroport NUMBER(4),
+CONSTRAINT pk_calatorie PRIMARY KEY(id_calatorie),
+CONSTRAINT fk_calatorie FOREIGN KEY(id_aeroport) REFERENCES aeroport(id_aeroport),
+CONSTRAINT cq_durata CHECK(durata_ore>0)
+);
+
+DESC calatorie;
+DROP TABLE calatorie;
+
+SELECT * FROM AEROPORT;
+
+(SELECT id_aeroport
+FROM aeroport
+WHERE nume='Aeroportul Otopeni');
+
+INSERT INTO calatorie(id_calatorie,durata_ore,data_plecarii,id_aeroport) VALUES(id_generator_3.NEXTVAL,2.5,TO_DATE('02-09-2021','dd-mm-yyyy'),(SELECT id_aeroport
+FROM aeroport
+WHERE nume='Cluj-Napoca Aeroport'));
+INSERT INTO calatorie(id_calatorie,durata_ore,data_plecarii,id_aeroport) VALUES(id_generator_3.NEXTVAL,3,TO_DATE('09-02-2021','dd-mm-yyyy'),(SELECT id_aeroport
+FROM aeroport
+WHERE nume='Cluj-Napoca Zboruri'));
+INSERT INTO calatorie(id_calatorie,data_plecarii,id_aeroport) VALUES(id_generator_3.NEXTVAL,TO_DATE('03-07-2020','dd-mm-yyyy'),(SELECT id_aeroport
+FROM aeroport
+WHERE nume='Cluj-Napoca Zboruri'));
+INSERT INTO calatorie(id_calatorie,data_plecarii,id_aeroport) VALUES(id_generator_3.NEXTVAL,TO_DATE('05-03-2019','dd-mm-yyyy'),(SELECT id_aeroport
+FROM aeroport
+WHERE nume='Aeroportul International Henri Coanda'));
+INSERT INTO calatorie(id_calatorie,data_plecarii,id_aeroport) VALUES(id_generator_3.NEXTVAL,TO_DATE('04-10-2018','dd-mm-yyyy'),(SELECT id_aeroport
+FROM aeroport
+WHERE nume='Amsterdam Flights'));
+INSERT INTO calatorie(id_calatorie,data_plecarii,id_aeroport) VALUES(id_generator_3.NEXTVAL,TO_DATE('17-01-2017','dd-mm-yyyy'),(SELECT id_aeroport
+FROM aeroport
+WHERE nume='Aeroportul Otopeni'));
+
+SELECT * FROM calatorie;
+
+CREATE TABLE participare(
+id_angajat NUMBER(4),
+id_campanie NUMBER(4),
+CONSTRAINT pk_participare PRIMARY KEY(id_angajat, id_campanie),
+CONSTRAINT fk_participare_angajat FOREIGN KEY(id_angajat) REFERENCES angajat(id_angajat),
+CONSTRAINT fk_participare_campanie FOREIGN KEY(id_campanie) REFERENCES campanie(id_campanie)
+);
+
+DESC participare;
+DROP TABLE participare;
+/
+BEGIN
+INSERT INTO participare(id_angajat, id_campanie) VALUES(26,4);
+INSERT INTO participare(id_angajat, id_campanie) VALUES(26,5);
+INSERT INTO participare(id_angajat, id_campanie) VALUES(26,3);
+INSERT INTO participare(id_angajat, id_campanie) VALUES(25,3);
+INSERT INTO participare(id_angajat, id_campanie) VALUES(27,5);
+INSERT INTO participare(id_angajat, id_campanie) VALUES(24,3);
+INSERT INTO participare(id_angajat, id_campanie) VALUES(28,4);
+INSERT INTO participare(id_angajat, id_campanie) VALUES(21,5);
+INSERT INTO participare(id_angajat, id_campanie) VALUES(21,1);
+INSERT INTO participare(id_angajat, id_campanie) VALUES(25,2);
+END;
+/
+SELECT * FROM participare;
+
+CREATE TABLE efectuare_calatorie(
+CNP CHAR(13),
+id_avion NUMBER(4),
+id_calatorie NUMBER(4),
+CONSTRAINT pk_efectuare PRIMARY KEY(CNP,id_avion,id_calatorie),
+CONSTRAINT fk_efec_cnp FOREIGN KEY(CNP) references pasager(CNP),
+CONSTRAINT fk_efec_avion FOREIGN KEY(id_avion) references avion(id_avion),
+CONSTRAINT fk_efec_calatorie FOREIGN KEY(id_calatorie) references calatorie(id_calatorie)
+);
+
+
+
+INSERT INTO efectuare_calatorie
+(SELECT p.CNP, a.id_avion, c.id_calatorie
+FROM avion a, pasager p, calatorie c
+WHERE a.id_avion<=3
+AND c.id_calatorie<=5);
+
+
+CREATE OR REPLACE PROCEDURE p1(v_ind_1 NUMBER,v_ind_2 NUMBER DEFAULT 0) AS
+ TYPE vector_salariu IS VARRAY(10) OF NUMBER(6);
+ criterii vector_salariu:=vector_salariu(4000,8000,12000,16000,20000);
+ TYPE tabel_ang IS TABLE OF angajat%ROWTYPE;
+ t tabel_ang:=tabel_ang();
+ TYPE ang_update IS TABLE OF angajat%ROWTYPE INDEX BY PLS_INTEGER;
+ s ang_update;
+ nr_participari NUMBER(5):=0;
+ nr_cert NUMBER(5):=0;
+ ct NUMBER(5):=0;
+ CURSOR c is
+ SELECT * FROM angajat;
+BEGIN
+    IF v_ind_2>5 OR (v_ind_1>v_ind_2 AND v_ind_2<>0) OR v_ind_1<1 OR v_ind_2<0
+    THEN
+    DBMS_OUTPUT.PUT_LINE('Indicii trebuie sa fie cuprinsi intre 1 si 5, iar primul mai mic sau egal cu al doilea');
+    ELSIF v_ind_2=0
+    THEN
+        FOR i in c LOOP
+            SELECT count(*) INTO nr_participari
+            FROM participare
+            WHERE id_angajat=i.id_angajat;
+            --DBMS_OUTPUT.PUT_LINE(nr_participari);
+            IF i.salariu IS NULL and nr_participari=0 AND v_ind_1>ct    
+            THEN
+              t.extend();
+              ct:=ct+1;
+              t(ct):=i;
+              DBMS_OUTPUT.PUT_LINE(ct);
+            END IF;
+        END LOOP;
+        
+        IF t.count>0
+        THEN
+        DBMS_OUTPUT.PUT_LINE('Au fost stersi urmatorii angajati:');
+        
+        FOR i in t.first..t.last LOOP
+        DBMS_OUTPUT.PUT_LINE('Angajatul '||t(i).nume||', inactiv la locul de munca');
+        DELETE FROM angajat
+        WHERE id_angajat=t(i).id_angajat;
+        END LOOP;
+        ELSE
+        DBMS_OUTPUT.PUT_LINE('Toti angajatii noi sunt activi');
+        END IF;
+    ELSE
+        SELECT *
+        BULK COLLECT INTO s
+        FROM angajat
+        WHERE salariu>=criterii(v_ind_1)
+        AND salariu<=criterii(v_ind_2);
+        
+        FOR i in s.first..s.last LOOP
+         SELECT count(*) INTO nr_cert
+            FROM certificat
+            WHERE id_angajat=s(i).id_angajat;
+        IF nr_cert>0
+        THEN 
+            UPDATE angajat
+            SET salariu=salariu*1.10
+            WHERE id_angajat=s(i).id_angajat;
+            DBMS_OUTPUT.PUT_LINE('Angajatul '||s(i).nume||' '||s(i).prenume||' are noul salariu ' ||s(i).salariu*1.10);
+        ELSE
+            DBMS_OUTPUT.PUT_LINE('Angajatul '||s(i).nume||' '||s(i).prenume||' nu are certificat, salariu nemodificat');
+        END IF;
+        END LOOP;
+    END IF;
+END p1;
+/
+
+
+BEGIN
+--inserez un angajat temporar pentru a arata stergerea sa din baza de date
+INSERT INTO angajat VALUES(200,'ANGAJAT','a','a',SYSDATE,null,null,null);
+--cauta maxim doi angajati noi si inactivi pe care sa ii stearga
+p1(2);
+--mareste salariul cu 10% angajatilor care au salariul cuprins intre treapta 1 si treapta 2 
+--si care au certificat
+p1(1,2);
+--cazuri care nu merg
+p1(1,6);
+p1(6,6);
+p1(3,2);
+p1(-1,-2);
+--toti ceilalti angajati sunt activi, deci nu sterge nimic
+p1(1);
+END;
+/
+
+
+CREATE OR REPLACE PROCEDURE p2(v_char VARCHAR2, optiune NUMBER DEFAULT 1) AS
+ v_salariu angajat.salariu%TYPE;
+ v_nume_ang angajat.nume%TYPE;
+ v_id_ang angajat.id_angajat%TYPE;
+ TYPE rec_aer IS RECORD (id_aeroport aeroport.id_aeroport%TYPE,
+                         nume aeroport.nume%TYPE,
+                         nume_locatie locatie.nume_locatie%TYPE
+                        );
+ v_aer rec_aer;
+ TYPE v_ref IS REF CURSOR RETURN rec_aer;
+ c_ref v_ref;
+ 
+ CURSOR p(id_aer aeroport.id_aeroport%TYPE) IS
+ SELECT id_angajat, nume, nvl(salariu,0)
+ FROM angajat
+ WHERE id_aeroport=id_aer
+ ORDER BY salariu desc;
+ exp EXCEPTION;
+ str EXCEPTION;
+ opt EXCEPTION;
+BEGIN
+    IF v_char>='0' AND v_char<='9'
+    THEN RAISE exp;
+    ELSIF length(v_char)>1
+    THEN RAISE str;
+    END IF;
+    
+    IF optiune=1 THEN
+    OPEN c_ref FOR
+    SELECT a.id_aeroport,a.nume,l.nume_locatie
+    FROM aeroport a, locatie l
+    WHERE a.id_locatie=l.id_locatie
+    AND lower(l.nume_locatie) LIKE (v_char||'%');
+    DBMS_OUTPUT.PUT_LINE('Pentru locatiile incepand cu '||v_char||':');
+    ELSIF optiune=2 THEN
+    OPEN c_ref FOR
+    SELECT a.id_aeroport,a.nume,l.nume_locatie
+    FROM aeroport a, locatie l
+    WHERE a.id_locatie=l.id_locatie
+    AND lower(l.nume_locatie) LIKE ('%'||v_char);
+    DBMS_OUTPUT.PUT_LINE('Pentru locatiile care se termina cu '||v_char||':');
+    ELSE
+    RAISE opt;
+    END IF;
+    LOOP
+    FETCH c_ref INTO v_aer;
+    EXIT WHEN c_ref%NOTFOUND;
+    DBMS_OUTPUT.PUT_LINE('Aeroportul '||v_aer.nume||' din locatia '||v_aer.nume_locatie||':');
+    DBMS_OUTPUT.PUT_LINE('Top 3 angajati: ');
+    OPEN p(v_aer.id_aeroport);
+        
+        LOOP
+        FETCH p INTO v_id_ang,v_nume_ang,v_salariu;
+        EXIT WHEN p%NOTFOUND OR p%ROWCOUNT>3;
+        DBMS_OUTPUT.PUT_LINE(p%ROWCOUNT||'.'||v_nume_ang||': '||v_salariu);
+        END LOOP;
+        IF p%ROWCOUNT<3
+        THEN DBMS_OUTPUT.PUT_LINE('Nu sunt destui angajati in acest aeroport');
+        END IF;
+    CLOSE p;
+    END LOOP;
+    IF c_ref%ROWCOUNT=0
+    THEN DBMS_OUTPUT.PUT_LINE('Nu exista aeroporturi in aceste locatii');
+    
+    END IF;
+    CLOSE c_ref;
+EXCEPTION
+    WHEN exp
+    THEN RAISE_APPLICATION_ERROR(-20001,'Inputul nu poate fi o cifra');
+    WHEN str
+    THEN RAISE_APPLICATION_ERROR(-20002,'Introduce numai un caracter!');
+    WHEN opt
+    THEN DBMS_OUTPUT.PUT_LINE('Optiune inexistenta: Alegeti intre 1 si 2');
+END p2;
+/
+
+
+BEGIN
+--locatia incepe cu litera a
+--p2('a',1);
+--locatia se termina cu litera a
+--p2('a',2);
+--eroare
+--p2(1,2);
+--afisare de mesaj: optiunea nu exista
+p2('b',3);
+--eroare: nu este doar un singur caracter
+p2('asdsadasdasd',1);
+END;
+/
+
+CREATE OR REPLACE FUNCTION f3
+(v_id_ang angajat.id_angajat%TYPE)
+RETURN NUMBER IS
+v_salariu angajat.salariu%TYPE;
+v_data angajat.data_angajarii%TYPE;
+v_job job.nume_job%TYPE;
+v_cnt number(5);
+v_part number(5);
+ang_nou EXCEPTION;
+veteran_activ EXCEPTION;
+job_neinreg EXCEPTION;
+certificate_ilegale EXCEPTION;
+BEGIN
+ SELECT a.salariu, a.data_angajarii,j.nume_job INTO v_salariu, v_data, v_job
+ FROM angajat a, job j
+ WHERE a.id_job=j.id_job(+)
+ AND a.id_angajat=v_id_ang
+ AND 0<(select count(*) 
+            from certificat c
+            where c.id_angajat=a.id_angajat
+            );
+ select count(*) INTO v_cnt
+            from certificat c
+            where c.id_angajat=v_id_ang;
+ select count(*) INTO v_part
+ FROM participare
+ WHERE id_angajat=v_id_ang;
+ IF v_cnt>v_part
+ THEN RAISE certificate_ilegale;
+ ELSIF MONTHS_BETWEEN(SYSDATE,v_data)>60
+ THEN RAISE veteran_activ;
+ ELSIF v_salariu IS NULL
+ THEN RAISE ang_nou;
+ ELSIF v_job IS NULL
+ THEN RAISE job_neinreg;
+ ELSE
+ RETURN v_cnt;
+ END IF;
+
+EXCEPTION
+    WHEN certificate_ilegale
+    THEN
+        DBMS_OUTPUT.PUT_LINE('Atentie: angajatul '||v_id_ang||' are mai multe certificate decat participari');
+        DBMS_OUTPUT.PUT_LINE('Se va returna numarul de certificate ilegale');
+        v_cnt:=v_cnt-v_part;
+        RETURN v_cnt;
+    WHEN veteran_activ
+    THEN
+        DBMS_OUTPUT.PUT_LINE('Atentie: angajatul '||v_id_ang||' este veteran, are un certificat in plus');
+        v_cnt:=v_cnt+1;
+        RETURN v_cnt;
+    WHEN ang_nou
+    THEN
+        DBMS_OUTPUT.PUT_LINE('Atentie: angajatul '||v_id_ang||' este nou!');
+        RETURN -1;
+    WHEN job_neinreg
+    THEN 
+    DBMS_OUTPUT.PUT_LINE('Atentie: Job-ul angajatului '||v_id_ang||' este neinregistrat');
+    RETURN 0;
+    WHEN NO_DATA_FOUND
+    THEN
+    RAISE_APPLICATION_ERROR(-20007,'Acest angajat nu are certificate');
+END f3;
+/
+
+DECLARE
+v_nr NUMBER(5);
+BEGIN
+    --inseram un angajat cu salariu null
+    INSERT INTO angajat VALUES(500,'c','c','c',SYSDATE,2,13,null);
+    INSERT INTO participare VALUES(500,2);
+    INSERT INTO certificat VALUES(500,SYSDATE,500,2);
+    v_nr:=f3(500);
+    DBMS_OUTPUT.PUT_LINE('Numar de certificate rezultat din functie: '||v_nr);
+    --angajat cu job-ul neinregistrat
+     v_nr:=f3(21);
+    DBMS_OUTPUT.PUT_LINE('Numar de certificate rezultat din functie: '||v_nr);
+    --angajat care are 3 certificate, dar 2 participari
+    v_nr:=f3(25);
+    DBMS_OUTPUT.PUT_LINE('Numar de certificate rezultat din functie: '||v_nr);
+    --veteran
+    v_nr:=f3(24);
+    DBMS_OUTPUT.PUT_LINE('Numar de certificate rezultat din functie: '||v_nr);
+    --transformam veteranul temporar in angajat cu mai putina vechime
+    UPDATE angajat
+    SET data_angajarii=SYSDATE
+    WHERE id_angajat=24;
+     v_nr:=f3(24);
+    DBMS_OUTPUT.PUT_LINE('Numar de certificate rezultat din functie: '||v_nr);
+    --angajat normal, dar cu 0 certificate, deci va rezulta eroarea
+    v_nr:=f3(302);
+    DBMS_OUTPUT.PUT_LINE('Numar de certificate rezultat din functie: '||v_nr);
+    ROLLBACK;
+END;
+/
+
+CREATE OR REPLACE PROCEDURE p4(v_nume_pasager pasager.nume%TYPE, v_id_aeroport aeroport.id_aeroport%TYPE)
+IS
+v_nr NUMBER(5);
+v_CNP pasager.CNP%TYPE;
+v_abonament NUMBER(7):=0;
+BEGIN
+SELECT p.CNP, count(*) INTO v_CNP, v_nr
+FROM abonament a, pasager p, efectuare_calatorie ec, aeroport ae, calatorie c
+WHERE p.CNP=a.CNP
+AND p.CNP=ec.CNP(+)
+AND ec.id_calatorie=c.id_calatorie
+AND c.id_aeroport=ae.id_aeroport
+AND p.nume=v_nume_pasager
+AND ae.id_aeroport=v_id_aeroport
+GROUP BY p.CNP;
+
+IF v_CNP LIKE '6%'
+THEN
+ IF (to_char(SYSDATE,'mm'))='03' AND to_char(SYSDATE,'dd')='08'
+ THEN
+ UPDATE abonament
+ SET puncte=puncte+v_nr*20
+ WHERE CNP=v_cnp;
+ ELSE
+ UPDATE abonament
+ SET puncte=puncte+v_nr*10
+ WHERE CNP=v_cnp;
+ END IF;
+ELSIF V_CNP LIKE '5%' THEN
+ IF (to_char(SYSDATE,'mm'))='11' AND to_char(SYSDATE,'dd')='19'
+ THEN
+ UPDATE abonament
+ SET puncte=puncte+v_nr*20
+ WHERE CNP=v_cnp;
+ ELSE
+ UPDATE abonament
+ SET puncte=puncte+v_nr*10
+ WHERE CNP=v_cnp;
+ END IF;
+END IF;
+
+DBMS_OUTPUT.PUT_LINE('Punctaj adaugat: '||v_nr*10);
+EXCEPTION
+WHEN NO_DATA_FOUND
+THEN 
+    DBMS_OUTPUT.PUT_LINE('Nu s-a putut realiza legatura intre date');
+    SELECT CNP INTO v_CNP
+    FROM pasager
+    WHERE nume=v_nume_pasager;
+    
+    SELECT count(CNP) INTO v_abonament
+    FROM abonament
+    WHERE CNP=v_CNP;
+    
+    SELECT count(CNP) INTO v_nr
+    FROM efectuare_calatorie
+    WHERE CNP=v_CNP;
+    
+    IF v_abonament=0
+    THEN
+    RAISE_APPLICATION_ERROR(-20008,'Eroare, abonament inexistent');
+    ELSIF v_nr=0
+    THEN
+    RAISE_APPLICATION_ERROR(-20009,'Eroare, utilizatorul nu a efectuat calatorii');
+    ELSE
+    RAISE_APPLICATION_ERROR(-20010,'Eroare nedefinita');
+    END IF;
+    
+WHEN TOO_MANY_ROWS
+    THEN 
+    RAISE_APPLICATION_ERROR(-20011,'Eroare, mai multi pasageri cu numele dat');
+
+END p4;
+
+/
+BEGIN
+--pasager fara abonament
+--INSERT INTO PASAGER VALUES(100,'abc','abc',null);
+--p4('abc',13);
+--pasager fara calatorii efectuate
+--INSERT INTO PASAGER VALUES(200,'abc','abc','abc');
+--INSERT INTO ABONAMENT VALUES(200,0,200);
+--p4('abc',13);
+--exista mai multi pasageri cu numele Eftimie
+--p4('Eftimie',13);
+--pasager normal
+p4('Talmaciu',13);
+
+END;
+/
+
+--trigger nivel de comanda
+
+CREATE OR REPLACE TRIGGER trigger_comanda
+BEFORE INSERT OR DELETE OR UPDATE ON angajat
+DECLARE
+v_msg VARCHAR2(100);
+v_ore NUMBER(5);
+v_minute NUMBER(5);
+BEGIN
+    IF TO_CHAR(SYSDATE, 'hh24') NOT BETWEEN 9 and 13
+    THEN
+     IF TO_CHAR(SYSDATE,'hh24')<9 
+     THEN
+     v_msg:='Inainte de ora 9';
+     v_ore:=9-TO_NUMBER(TO_CHAR(SYSDATE,'hh24'));
+     v_minute:=60-TO_NUMBER(TO_CHAR(SYSDATE,'mi'));
+     IF v_minute<>0
+     THEN v_ore:=v_ore-1;
+     END IF;
+     ELSIF TO_CHAR(SYSDATE,'hh24')>13
+     THEN
+     v_msg:='Dupa ora 13';
+     v_ore:=33-TO_NUMBER(TO_CHAR(SYSDATE,'hh24'));
+     v_minute:=60-TO_NUMBER(TO_CHAR(SYSDATE,'mi'));
+      IF v_minute<>0
+      THEN v_ore:=v_ore-1;
+      END IF;
+     END IF;
+     IF INSERTING
+     THEN
+     RAISE_APPLICATION_ERROR(-20001,'Inserare interzisa '||v_msg||', Revino in aproximativ '||v_ore||' ore, '||v_minute||' minute');
+     ELSIF DELETING
+     THEN
+     RAISE_APPLICATION_ERROR(-20002,'Stergere interzisa '||v_msg||', Revino in aproximativ '||v_ore||' ore, '||v_minute||' minute');
+     ELSIF UPDATING
+     THEN
+     RAISE_APPLICATION_ERROR(-20003,'Actualizare interzisa '||v_msg||', Revino in aproximativ '||v_ore||' ore, '||v_minute||' minute');
+     END IF;
+    END IF;
+END;
+/
+DROP TRIGGER trigger_comanda;
+SELECT to_char(SYSDATE,'hh24') FROM DUAL;
+/
+BEGIN
+UPDATE ANGAJAT
+SET SALARIU=15000
+WHERE id_angajat=21;
+END;
+/
+--trigger nivel de linie
+
+CREATE OR REPLACE TRIGGER trigger_linie
+BEFORE INSERT OR UPDATE OF salariu ON angajat
+FOR EACH ROW
+DECLARE
+salariu_max_ang angajat.salariu%TYPE;
+salariu_min_job job.salariu_minim%TYPE;
+v_id_job job.id_job%TYPE;
+exc EXCEPTION;
+BEGIN
+  IF UPDATING THEN
+    IF :OLD.id_job IS NULL
+        THEN RAISE_APPLICATION_ERROR(-20005,'ID al job-ului null');
+    END IF;
+  END IF;
+  
+  IF :NEW.id_job IS NULL
+  THEN 
+    salariu_min_job:=1500;
+    DBMS_OUTPUT.PUT_LINE('Id job null la inserare, vom considera salariul minim 1500');
+  ELSE
+    SELECT salariu_minim INTO salariu_min_job
+    FROM job 
+    WHERE id_job=:NEW.id_job;
+ END IF;
+  IF :NEW.salariu>4*salariu_min_job
+   THEN RAISE_APPLICATION_ERROR(-20004,'Un angajat nu poate avea salariul mai mare decat de 4 ori salariul minim');
+  ELSIF :NEW.salariu<salariu_min_job
+  THEN
+    :NEW.salariu:=salariu_min_job;
+    DBMS_OUTPUT.PUT_LINE('Salariu prea mic, resetat la salariul minim al job-ului respectiv');
+  --ELSE
+  END IF;
+
+END;
+/
+DROP TRIGGER trigger_linie;
+
+/
+select * from angajat;
+/
+BEGIN
+INSERT INTO ANGAJAT VALUES(1000,'A','A','A',SYSDATE,2,null,3000);
+INSERT INTO ANGAJAT VALUES(1001,'B','B','B',SYSDATE,null,null,3000);
+UPDATE angajat
+SET salariu=20
+WHERE
+id_angajat=23;
+
+--Eroare: angajatul are salariu prea mare
+--UPDATE angajat
+--SET salariu=200000
+--WHERE
+--id_angajat=23;
+END;
+/
+BEGIN
+--Eroare: id al job-ului null
+UPDATE ANGAJAT
+SET SALARIU=15000
+WHERE id_angajat=21;
+END;
+/
+BEGIN
+--Eroare: salariu prea mare
+INSERT INTO ANGAJAT VALUES(1001,'B','B','B',SYSDATE,null,null,300000);
+END;
+/
+rollback;
+
+DELETE
+FROM angajat
+WHERE id_angajat=1000;
+
+select * from angajat;
+rollback;
+
+--trigger in LDD
+
+SELECT SYSTIMESTAMP FROM DUAL;
+
+CREATE TABLE audit_log
+(nume_user VARCHAR2(50),
+eveniment VARCHAR2(20),
+tip_obiect_referit VARCHAR2(30),
+nume_obiect_referit VARCHAR2(30),
+data TIMESTAMP);
+
+
+CREATE OR REPLACE TRIGGER trigger_ldd
+AFTER CREATE OR DROP OR ALTER ON SCHEMA
+BEGIN
+INSERT INTO audit_log
+     VALUES (SYS.LOGIN_USER, SYS.SYSEVENT, SYS.DICTIONARY_OBJ_TYPE,
+            SYS.DICTIONARY_OBJ_NAME, SYSTIMESTAMP);
+DBMS_OUTPUT.PUT_LINE('La ora '||SYSTIMESTAMP);
+IF SYS.SYSEVENT='CREATE'
+    THEN
+    DBMS_OUTPUT.PUT_LINE(SYS.LOGIN_USER||' A creat un obiect de tip ' ||SYS.DICTIONARY_OBJ_TYPE||' intitulat '||SYS.DICTIONARY_OBJ_NAME);
+ELSIF SYS.SYSEVENT='DROP'
+    THEN
+    DBMS_OUTPUT.PUT_LINE(SYS.LOGIN_USER||' A sters un obiect de tip ' ||SYS.DICTIONARY_OBJ_TYPE||' intitulat '||SYS.DICTIONARY_OBJ_NAME);
+ELSIF SYS.SYSEVENT='ALTER'
+    THEN
+    DBMS_OUTPUT.PUT_LINE(SYS.LOGIN_USER||' A modificat un obiect de tip ' ||SYS.DICTIONARY_OBJ_TYPE||' intitulat '||SYS.DICTIONARY_OBJ_NAME);
+END IF;
+END;
+/
+DROP TRIGGER trigger_ldd;
+/
+CREATE TABLE test(id varchar2(3) primary key);
+ALTER TABLE test
+ADD testt varchar2(3);
+ROLLBACK;
+DESC test;
+DROP TABLE test;
+
+select * from audit_log;
+
+/
+CREATE OR REPLACE PACKAGE pachet_13
+AS
+PROCEDURE p1(v_ind_1 NUMBER,v_ind_2 NUMBER DEFAULT 0);
+PROCEDURE p2(v_char VARCHAR2, optiune NUMBER DEFAULT 1);
+FUNCTION f3(v_id_ang angajat.id_angajat%TYPE) RETURN NUMBER;
+PROCEDURE p4(v_nume_pasager pasager.nume%TYPE, v_id_aeroport aeroport.id_aeroport%TYPE);
+END pachet_13;
+/
+
+CREATE OR REPLACE PACKAGE BODY pachet_13 AS
+PROCEDURE p1(v_ind_1 NUMBER,v_ind_2 NUMBER DEFAULT 0) AS
+ TYPE vector_salariu IS VARRAY(10) OF NUMBER(6);
+ criterii vector_salariu:=vector_salariu(4000,8000,12000,16000,20000);
+ TYPE tabel_ang IS TABLE OF angajat%ROWTYPE;
+ t tabel_ang:=tabel_ang();
+ TYPE ang_update IS TABLE OF angajat%ROWTYPE INDEX BY PLS_INTEGER;
+ s ang_update;
+ nr_participari NUMBER(5):=0;
+ nr_cert NUMBER(5):=0;
+ ct NUMBER(5):=0;
+ CURSOR c is
+ SELECT * FROM angajat;
+BEGIN
+    IF v_ind_2>5 OR (v_ind_1>v_ind_2 AND v_ind_2<>0) OR v_ind_1<1 OR v_ind_2<0
+    THEN
+    DBMS_OUTPUT.PUT_LINE('Indicii trebuie sa fie cuprinsi intre 1 si 5, iar primul mai mic sau egal cu al doilea');
+    ELSIF v_ind_2=0
+    THEN
+        FOR i in c LOOP
+            SELECT count(*) INTO nr_participari
+            FROM participare
+            WHERE id_angajat=i.id_angajat;
+            --DBMS_OUTPUT.PUT_LINE(nr_participari);
+            IF i.salariu IS NULL and nr_participari=0 AND v_ind_1>ct    
+            THEN
+              t.extend();
+              ct:=ct+1;
+              t(ct):=i;
+              DBMS_OUTPUT.PUT_LINE(ct);
+            END IF;
+        END LOOP;
+        
+        IF t.count>0
+        THEN
+        DBMS_OUTPUT.PUT_LINE('Au fost stersi urmatorii angajati:');
+        
+        FOR i in t.first..t.last LOOP
+        DBMS_OUTPUT.PUT_LINE('Angajatul '||t(i).nume||', inactiv la locul de munca');
+        DELETE FROM angajat
+        WHERE id_angajat=t(i).id_angajat;
+        END LOOP;
+        ELSE
+        DBMS_OUTPUT.PUT_LINE('Toti angajatii noi sunt activi');
+        END IF;
+    ELSE
+        SELECT *
+        BULK COLLECT INTO s
+        FROM angajat
+        WHERE salariu>=criterii(v_ind_1)
+        AND salariu<=criterii(v_ind_2);
+        
+        FOR i in s.first..s.last LOOP
+         SELECT count(*) INTO nr_cert
+            FROM certificat
+            WHERE id_angajat=s(i).id_angajat;
+        IF nr_cert>0
+        THEN 
+            UPDATE angajat
+            SET salariu=salariu*1.10
+            WHERE id_angajat=s(i).id_angajat;
+            DBMS_OUTPUT.PUT_LINE('Angajatul '||s(i).nume||' '||s(i).prenume||' are noul salariu ' ||s(i).salariu*1.10);
+        ELSE
+            DBMS_OUTPUT.PUT_LINE('Angajatul '||s(i).nume||' '||s(i).prenume||' nu are certificat, salariu nemodificat');
+        END IF;
+        END LOOP;
+    END IF;
+END p1;
+
+PROCEDURE p2(v_char VARCHAR2, optiune NUMBER DEFAULT 1) AS
+ v_salariu angajat.salariu%TYPE;
+ v_nume_ang angajat.nume%TYPE;
+ v_id_ang angajat.id_angajat%TYPE;
+ TYPE rec_aer IS RECORD (id_aeroport aeroport.id_aeroport%TYPE,
+                         nume aeroport.nume%TYPE,
+                         nume_locatie locatie.nume_locatie%TYPE
+                        );
+ v_aer rec_aer;
+ TYPE v_ref IS REF CURSOR RETURN rec_aer;
+ c_ref v_ref;
+ 
+ CURSOR p(id_aer aeroport.id_aeroport%TYPE) IS
+ SELECT id_angajat, nume, nvl(salariu,0)
+ FROM angajat
+ WHERE id_aeroport=id_aer
+ ORDER BY salariu desc;
+ exp EXCEPTION;
+ str EXCEPTION;
+ opt EXCEPTION;
+BEGIN
+    IF v_char>='0' AND v_char<='9'
+    THEN RAISE exp;
+    ELSIF length(v_char)>1
+    THEN RAISE str;
+    END IF;
+    
+    IF optiune=1 THEN
+    OPEN c_ref FOR
+    SELECT a.id_aeroport,a.nume,l.nume_locatie
+    FROM aeroport a, locatie l
+    WHERE a.id_locatie=l.id_locatie
+    AND lower(l.nume_locatie) LIKE (v_char||'%');
+    DBMS_OUTPUT.PUT_LINE('Pentru locatiile incepand cu '||v_char||':');
+    ELSIF optiune=2 THEN
+    OPEN c_ref FOR
+    SELECT a.id_aeroport,a.nume,l.nume_locatie
+    FROM aeroport a, locatie l
+    WHERE a.id_locatie=l.id_locatie
+    AND lower(l.nume_locatie) LIKE ('%'||v_char);
+    DBMS_OUTPUT.PUT_LINE('Pentru locatiile care se termina cu '||v_char||':');
+    ELSE
+    RAISE opt;
+    END IF;
+    LOOP
+    FETCH c_ref INTO v_aer;
+    EXIT WHEN c_ref%NOTFOUND;
+    DBMS_OUTPUT.PUT_LINE('Aeroportul '||v_aer.nume||' din locatia '||v_aer.nume_locatie||':');
+    DBMS_OUTPUT.PUT_LINE('Top 3 angajati: ');
+    OPEN p(v_aer.id_aeroport);
+        
+        LOOP
+        FETCH p INTO v_id_ang,v_nume_ang,v_salariu;
+        EXIT WHEN p%NOTFOUND OR p%ROWCOUNT>3;
+        DBMS_OUTPUT.PUT_LINE(p%ROWCOUNT||'.'||v_nume_ang||': '||v_salariu);
+        END LOOP;
+        IF p%ROWCOUNT<3
+        THEN DBMS_OUTPUT.PUT_LINE('Nu sunt destui angajati in acest aeroport');
+        END IF;
+    CLOSE p;
+    END LOOP;
+    IF c_ref%ROWCOUNT=0
+    THEN DBMS_OUTPUT.PUT_LINE('Nu exista aeroporturi in aceste locatii');
+    
+    END IF;
+    CLOSE c_ref;
+EXCEPTION
+    WHEN exp
+    THEN RAISE_APPLICATION_ERROR(-20001,'Inputul nu poate fi o cifra');
+    WHEN str
+    THEN RAISE_APPLICATION_ERROR(-20002,'Introduce numai un caracter!');
+    WHEN opt
+    THEN DBMS_OUTPUT.PUT_LINE('Optiune inexistenta: Alegeti intre 1 si 2');
+END p2;
+
+FUNCTION f3 (v_id_ang angajat.id_angajat%TYPE) RETURN NUMBER
+IS
+v_salariu angajat.salariu%TYPE;
+v_data angajat.data_angajarii%TYPE;
+v_job job.nume_job%TYPE;
+v_cnt number(5);
+v_part number(5);
+ang_nou EXCEPTION;
+veteran_activ EXCEPTION;
+job_neinreg EXCEPTION;
+certificate_ilegale EXCEPTION;
+BEGIN
+ SELECT a.salariu, a.data_angajarii,j.nume_job INTO v_salariu, v_data, v_job
+ FROM angajat a, job j
+ WHERE a.id_job=j.id_job(+)
+ AND a.id_angajat=v_id_ang
+ AND 0<(select count(*) 
+            from certificat c
+            where c.id_angajat=a.id_angajat
+            );
+ select count(*) INTO v_cnt
+            from certificat c
+            where c.id_angajat=v_id_ang;
+ select count(*) INTO v_part
+ FROM participare
+ WHERE id_angajat=v_id_ang;
+ IF v_cnt>v_part
+ THEN RAISE certificate_ilegale;
+ ELSIF MONTHS_BETWEEN(SYSDATE,v_data)>60
+ THEN RAISE veteran_activ;
+ ELSIF v_salariu IS NULL
+ THEN RAISE ang_nou;
+ ELSIF v_job IS NULL
+ THEN RAISE job_neinreg;
+ ELSE
+ RETURN v_cnt;
+ END IF;
+
+EXCEPTION
+    WHEN certificate_ilegale
+    THEN
+        DBMS_OUTPUT.PUT_LINE('Atentie: angajatul '||v_id_ang||' are mai multe certificate decat participari');
+        DBMS_OUTPUT.PUT_LINE('Se va returna numarul de certificate ilegale');
+        v_cnt:=v_cnt-v_part;
+        RETURN v_cnt;
+    WHEN veteran_activ
+    THEN
+        DBMS_OUTPUT.PUT_LINE('Atentie: angajatul '||v_id_ang||' este veteran, are un certificat in plus');
+        v_cnt:=v_cnt+1;
+        RETURN v_cnt;
+    WHEN ang_nou
+    THEN
+        DBMS_OUTPUT.PUT_LINE('Atentie: angajatul '||v_id_ang||' este nou!');
+        RETURN -1;
+    WHEN job_neinreg
+    THEN 
+    DBMS_OUTPUT.PUT_LINE('Atentie: Job-ul angajatului '||v_id_ang||' este neinregistrat');
+    RETURN 0;
+    WHEN NO_DATA_FOUND
+    THEN
+    RAISE_APPLICATION_ERROR(-20007,'Acest angajat nu are certificate');
+END f3;
+
+PROCEDURE p4(v_nume_pasager pasager.nume%TYPE, v_id_aeroport aeroport.id_aeroport%TYPE)
+IS
+v_nr NUMBER(5);
+v_CNP pasager.CNP%TYPE;
+v_abonament NUMBER(7):=0;
+BEGIN
+SELECT p.CNP, count(*) INTO v_CNP, v_nr
+FROM abonament a, pasager p, efectuare_calatorie ec, aeroport ae, calatorie c
+WHERE p.CNP=a.CNP
+AND p.CNP=ec.CNP(+)
+AND ec.id_calatorie=c.id_calatorie
+AND c.id_aeroport=ae.id_aeroport
+AND p.nume=v_nume_pasager
+AND ae.id_aeroport=v_id_aeroport
+GROUP BY p.CNP;
+
+IF v_CNP LIKE '6%'
+THEN
+ IF (to_char(SYSDATE,'mm'))='03' AND to_char(SYSDATE,'dd')='08'
+ THEN
+ UPDATE abonament
+ SET puncte=puncte+v_nr*20
+ WHERE CNP=v_cnp;
+ ELSE
+ UPDATE abonament
+ SET puncte=puncte+v_nr*10
+ WHERE CNP=v_cnp;
+ END IF;
+ELSIF V_CNP LIKE '5%' THEN
+ IF (to_char(SYSDATE,'mm'))='11' AND to_char(SYSDATE,'dd')='19'
+ THEN
+ UPDATE abonament
+ SET puncte=puncte+v_nr*20
+ WHERE CNP=v_cnp;
+ ELSE
+ UPDATE abonament
+ SET puncte=puncte+v_nr*10
+ WHERE CNP=v_cnp;
+ END IF;
+END IF;
+
+DBMS_OUTPUT.PUT_LINE('Noul punctaj: '||v_nr*10);
+EXCEPTION
+WHEN NO_DATA_FOUND
+THEN 
+    DBMS_OUTPUT.PUT_LINE('Nu s-a putut realiza legatura intre date');
+    SELECT CNP INTO v_CNP
+    FROM pasager
+    WHERE nume=v_nume_pasager;
+    
+    SELECT count(CNP) INTO v_abonament
+    FROM abonament
+    WHERE CNP=v_CNP;
+    
+    SELECT count(CNP) INTO v_nr
+    FROM efectuare_calatorie
+    WHERE CNP=v_CNP;
+    
+    IF v_abonament=0
+    THEN
+    RAISE_APPLICATION_ERROR(-20008,'Eroare, abonament inexistent');
+    ELSIF v_nr=0
+    THEN
+    RAISE_APPLICATION_ERROR(-20009,'Eroare, utilizatorul nu a efectuat calatorii');
+    ELSE
+    RAISE_APPLICATION_ERROR(-20010,'Eroare nedefinita');
+    END IF;
+    
+WHEN TOO_MANY_ROWS
+    THEN 
+    RAISE_APPLICATION_ERROR(-20011,'Eroare, mai multi pasageri cu numele dat');
+
+END p4;
+
+END pachet_13;
+/
+
+
+DECLARE
+v_nr NUMBER(5);
+BEGIN
+pachet_13.p1(1,2);
+DBMS_OUTPUT.PUT_LINE('--------------');
+pachet_13.p2('i',2);
+DBMS_OUTPUT.PUT_LINE('--------------');
+v_nr:=pachet_13.f3(24);
+DBMS_OUTPUT.PUT_LINE(v_nr);
+DBMS_OUTPUT.PUT_LINE('--------------');
+pachet_13.p4('Talmaciu',13);
+END;
+/
+
+drop trigger trigger_linie;
+
+CREATE OR REPLACE PACKAGE gestiune_14 AS
+TYPE ang_rec IS RECORD (id_ang angajat.id_angajat%TYPE,
+                        salariu angajat.salariu%TYPE,
+                        id_job angajat.id_job%TYPE,
+                        id_aeroport angajat.id_aeroport%TYPE
+                        );
+                        
+TYPE ang_job IS RECORD (id_ang angajat.id_angajat%TYPE,
+                        salariu angajat.salariu%TYPE,
+                        id_job angajat.id_job %TYPE,
+                        salariu_minim job.salariu_minim%TYPE
+                        );
+TYPE t_ang IS TABLE OF ang_rec INDEX BY PLS_INTEGER;
+TYPE t_aerop IS TABLE of NUMBER(7) INDEX BY PLS_INTEGER;
+CURSOR c_ang(v_id_job angajat.id_job%TYPE) RETURN ang_job; 
+FUNCTION aeroport_null(v_id angajat.id_angajat%TYPE) RETURN NUMBER;
+FUNCTION ang_nou(v_id angajat.id_angajat%TYPE) RETURN NUMBER;
+FUNCTION job_null(v_id angajat.id_angajat%TYPE) RETURN NUMBER;
+FUNCTION suma_job(v_id_job job.id_job%TYPE) RETURN NUMBER;
+PROCEDURE acordare_locuri;
+PROCEDURE actualizare_salariu(v_id_job job.id_job%TYPE);
+END gestiune_14;
+/
+
+CREATE OR REPLACE PACKAGE BODY gestiune_14 AS
+ 
+    CURSOR c_ang(v_id_job angajat.id_job%TYPE) RETURN ang_job IS
+    SELECT a.id_angajat, a.salariu, a.id_job, j.salariu_minim
+    FROM angajat a, job j
+    WHERE a.id_job=j.id_job
+    AND  a.id_job=v_id_job
+    ORDER BY nvl(salariu,0);
+    
+    FUNCTION suma_job(v_id_job job.id_job%TYPE) RETURN NUMBER
+    IS
+    suma NUMBER(10);
+    BEGIN
+    select (sum(nvl(salariu,0))) INTO suma
+    FROM angajat
+    WHERE id_job=v_id_job;
+    RETURN suma;
+    END suma_job;
+    
+    FUNCTION aeroport_null(v_id angajat.id_angajat%TYPE) RETURN NUMBER
+    IS
+    v_id_aeroport angajat.id_aeroport%TYPE;
+    BEGIN
+        SELECT id_aeroport INTO v_id_aeroport
+        FROM angajat
+        WHERE id_angajat=v_id;
+        IF v_id_aeroport IS NULL
+        THEN
+        RETURN 1;
+        ELSE
+        RETURN 0;
+        END IF;
+    EXCEPTION
+        WHEN NO_DATA_FOUND
+        THEN RETURN -1;
+    END aeroport_null;
+
+    FUNCTION ang_nou(v_id angajat.id_angajat%TYPE) RETURN NUMBER
+    IS
+    v_salariu angajat.salariu%TYPE;
+    BEGIN
+        SELECT salariu INTO v_salariu
+        FROM angajat
+        WHERE id_angajat=v_id;
+        IF v_salariu IS NULL
+        THEN
+        RETURN 1;
+        ELSE
+        RETURN 0;
+        END IF;
+    EXCEPTION
+        WHEN NO_DATA_FOUND
+        THEN RETURN -1;
+    END ang_nou;
+    
+    FUNCTION job_null(v_id angajat.id_angajat%TYPE) RETURN NUMBER
+    IS
+    v_id_job angajat.id_job%TYPE;
+    BEGIN
+        SELECT id_aeroport INTO v_id_job
+        FROM angajat
+        WHERE id_angajat=v_id;
+        IF v_id_job IS NULL
+        THEN
+        RETURN 1;
+        ELSE
+        RETURN 0;
+        END IF;
+    EXCEPTION
+        WHEN NO_DATA_FOUND
+        THEN RETURN -1;
+    END job_null;
+    
+    
+    PROCEDURE acordare_locuri IS
+    lista_ang t_ang;
+    lista_aerop t_aerop;
+    cnt NUMBER(5):=0;
+    v_id_min angajat.id_aeroport%TYPE;
+    v_salariu_min job.salariu_minim%TYPE;
+    BEGIN
+        SELECT id_angajat, salariu, id_job, id_aeroport
+        BULK COLLECT INTO lista_ang
+        FROM angajat;
+        
+        SELECT id_aeroport
+        BULK COLLECT INTO lista_aerop
+        FROM aeroport;
+        
+        FOR i in lista_ang.first..lista_ang.last LOOP
+        DBMS_OUTPUT.PUT_LINE('Status Initial al angajatului '||lista_ang(i).id_ang||':');
+        DBMS_OUTPUT.PUT_LINE('Salariu: '||lista_ang(i).salariu);
+        DBMS_OUTPUT.PUT_LINE('Id Job: '||lista_ang(i).id_job);
+        DBMS_OUTPUT.PUT_LINE('Id Aeroport: '||lista_ang(i).id_aeroport);
+         IF ang_nou(lista_ang(i).id_ang)=1 AND job_null(lista_ang(i).id_ang)=1
+         THEN
+         DELETE FROM angajat
+         WHERE id_angajat=lista_ang(i).id_ang;
+         DBMS_OUTPUT.PUT_LINE('Angajatul este inactiv, deci sters din baza de date');
+         ELSIF ang_nou(lista_ang(i).id_ang)=1 AND job_null(lista_ang(i).id_ang)=0
+         THEN
+         SELECT salariu_minim INTO v_salariu_min
+         FROM job 
+         WHERE id_job=lista_ang(i).id_job;
+         
+         UPDATE angajat
+         SET salariu=v_salariu_min
+         WHERE id_angajat=lista_ang(i).id_ang;
+         DBMS_OUTPUT.PUT_LINE('Angajatul a primit salariul minim specific job-ului sau, '||v_salariu_min);
+         END IF;
+         
+         IF aeroport_null(lista_ang(i).id_ang)=1
+         THEN
+         cnt:=cnt+1;
+            IF cnt=lista_aerop.last+1 OR cnt=0
+            THEN
+            cnt:=lista_aerop.first;
+            END IF;
+         
+         UPDATE angajat
+         SET id_aeroport=lista_aerop(cnt)
+         WHERE id_angajat=lista_ang(i).id_ang;
+         DBMS_OUTPUT.PUT_LINE('Angajatul lucreaza acum in aeroportul cu id-ul '||lista_aerop(cnt));
+         END IF;
+        END LOOP;
+    END acordare_locuri;
+
+PROCEDURE actualizare_salariu(v_id_job job.id_job%TYPE)
+    IS
+    v_ang ang_job;
+    suma NUMBER(10);
+    prea_mare exception;
+    BEGIN
+        suma:=suma_job(v_id_job);
+        IF (suma>35000)
+        THEN RAISE prea_mare;
+        END IF;
+        OPEN c_ang(v_id_job);
+        LOOP
+        FETCH c_ang INTO v_ang;
+        EXIT WHEN c_ang%NOTFOUND;
+        IF v_ang.salariu<=2*v_ang.salariu_minim AND v_ang.salariu>=v_ang.salariu_minim
+        THEN
+        suma:=suma+(v_ang.salariu-v_ang.salariu_minim);
+        UPDATE angajat
+        SET salariu=2*salariu
+        WHERE id_angajat=v_ang.id_ang;
+            IF (suma>35000)
+            THEN RAISE prea_mare;
+            END IF;
+        END IF;
+        END LOOP;
+        CLOSE c_ang;
+    EXCEPTION
+    WHEN prea_mare
+    THEN DBMS_OUTPUT.PUT_LINE('Suma salariilor depaseste 35000, procesul a fost oprit');
+    END actualizare_salariu;
+END gestiune_14; 
+/
+
+SELECT * FROM angajat;
+BEGIN
+    gestiune_14.acordare_locuri;
+END;
+/
+BEGIN
+gestiune_14.actualizare_salariu(1);
+gestiune_14.actualizare_salariu(2);
+END;
+/
+select * from angajat;
+/
+select * from job;
+
+    
