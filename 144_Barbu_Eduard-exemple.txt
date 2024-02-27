@@ -1,0 +1,123 @@
+--subcerere nesincronizata in clauza FROM
+SELECT a.id_angajat, a.nume || ', ' || a.prenume "Nume Intreg", l.nume_locatie
+FROM angajat a, (SELECT DISTINCT(id_angajat) FROM certificat) c, locatie l, aeroport ae
+WHERE a.id_aeroport=ae.id_aeroport
+AND ae.id_locatie=l.id_locatie
+AND a.id_angajat IN c.id_angajat
+AND lower(l.nume_locatie) LIKE 'cluj%';
+
+
+--grupari, functii grup, filtrari, INSTR, lower
+SELECT id_aeroport, COUNT(*),AVG(NVL(salariu,0)) "Salariu Mediu"
+FROM angajat
+WHERE id_job IN (SELECT id_job
+                FROM job
+                WHERE INSTR(lower(nume_job),'c')=1
+                )
+AND id_aeroport IN (SELECT id_aeroport
+                    FROM aeroport
+                    WHERE nume LIKE '%Otopeni'
+                    UNION
+                    SELECT id_aeroport
+                    FROM aeroport
+                    WHERE nume LIKE'%Henri Coanda'
+                    )
+GROUP BY id_aeroport
+HAVING COUNT(*)>=2
+AND AVG(NVL(salariu,0))>4000;
+
+
+--DECODE,NVL,Ordonari in aceeasi functie, 
+SELECT NVL(j.nume_job, 'Job Necunoscut'),
+    MIN(DECODE(a.id_job,(SELECT id_job FROM job WHERE nume_job='Pilot'),salariu,0)) "Salariu Minim Pilot",
+    MIN(DECODE(a.id_job,(SELECT id_job FROM job WHERE nume_job='Copilot'),salariu,0)) "Salariu Minim Copilot",
+    MIN(DECODE(NVL(a.id_job,0),0,salariu,0)) "Salariu Minim Necunoscut",
+    SUM(salariu) Total
+FROM angajat a, job j
+WHERE a.id_job=j.id_job(+)
+AND ROUND(MONTHS_BETWEEN(SYSDATE,ROUND(data_angajarii)))>=24
+GROUP BY nume_job
+ORDER BY Total DESC;
+
+
+
+--functia CASE, clauza WITH, ROUND, MONTHS_BETWEEN
+WITH medie_revizie AS (SELECT ma.tip_avion tip, AVG(ROUND(MONTHS_BETWEEN(SYSDATE,ROUND(data_reviziei)))) medie
+                      FROM model_avion ma ,avion a
+                      WHERE a.tip_avion=ma.tip_avion
+                      GROUP BY ma.tip_avion
+                        )
+SELECT tip_avion, data_reviziei,
+CASE 
+WHEN ROUND(MONTHS_BETWEEN(SYSDATE,ROUND(data_reviziei)))>
+(SELECT medie FROM medie_revizie WHERE tip=tip_avion) THEN 'Necesita Revizie'
+ELSE 'Nu necesita revizie'
+END "Necesitatea Reviziei"
+FROM avion;
+
+
+
+--subcereri sincronizate in care intervin cel putin 3 tabele
+SELECT nume, prenume, salariu, id_job
+FROM angajat a
+WHERE salariu>=(SELECT AVG(salariu)
+                FROM angajat b
+                WHERE a.id_job=b.id_job
+                AND EXISTS
+                (SELECT 1
+                FROM certificat c, campanie ca, angajat ac
+                WHERE c.id_campanie=ca.id_campanie
+                AND c.id_angajat=ac.id_angajat
+                AND ac.id_angajat=b.id_angajat
+                AND lower(ca.beneficii) LIKE 'promovare%'
+                )
+                );
+                
+
+
+
+--13
+--i)
+UPDATE angajat
+set id_aeroport=(SELECT id_aeroport
+                 FROM angajat
+                 WHERE id_angajat=(SELECT id_angajat FROM angajat WHERE nume='Barbu' AND prenume='Andrei')
+                )
+where id_aeroport IS NULL;
+
+
+--ii)
+
+DELETE FROM abonament
+WHERE CNP IN (select CNP from pasager WHERE CNP LIKE '5%'
+             union
+             select CNP from pasager WHERE CNP LIKE '1%');
+
+--iii)
+UPDATE angajat
+set id_job=(SELECT id_job
+            FROM job
+            WHERE id_job=(SELECT id_job FROM job WHERE nume='Casier')
+            )
+where id_job IS NULL;
+
+
+rollback;
+
+--iv)
+DELETE FROM certificat
+WHERE data_primirii < ANY(SELECT data_sfarsit FROM campanie WHERE data_sfarsit<TO_DATE('01-01-2023','dd-mm-yyyy'));
+rollback;
+
+--v)
+DELETE FROM efectuare_calatorie
+WHERE id_calatorie=(select id_calatorie FROM calatorie WHERE id_aeroport=(SELECT id_aeroport FROM aeroport where nume='Noul Aeroport Cotroceni'));
+
+--vi)
+UPDATE job
+set salariu_minim=(SELECT AVG(salariu_minim)
+            FROM job
+            )
+WHERE salariu_minim=(SELECT MIN(salariu_minim)
+                FROM job
+                );

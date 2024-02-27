@@ -1,0 +1,411 @@
+CREATE SEQUENCE id_generator
+INCREMENT BY 1
+START WITH 1
+MINVALUE 1
+MAXVALUE 100
+CYCLE
+NOCACHE
+ORDER;
+
+CREATE SEQUENCE id_generator_1
+INCREMENT BY 1
+START WITH 1
+MINVALUE 1
+MAXVALUE 100
+CYCLE
+NOCACHE
+ORDER;
+
+CREATE SEQUENCE id_generator_2
+INCREMENT BY 1
+START WITH 1
+MINVALUE 1
+MAXVALUE 100
+CYCLE
+NOCACHE
+ORDER;
+
+CREATE SEQUENCE id_generator_3
+INCREMENT BY 1
+START WITH 1
+MINVALUE 1
+MAXVALUE 100
+CYCLE
+NOCACHE
+ORDER;
+
+DROP SEQUENCE id_generator; --pentru a scapa de secvente
+DROP SEQUENCE id_generator_1;
+DROP SEQUENCE id_generator_2;
+DROP SEQUENCE id_generator_3;
+
+
+CREATE TABLE job(
+id_job NUMBER(4),
+nume_job VARCHAR2(30),
+salariu_minim NUMBER(7) DEFAULT 4000,
+CONSTRAINT pk_job PRIMARY KEY(id_job),
+CONSTRAINT cq_salariu CHECK(salariu_minim>=4000),
+CONSTRAINT uq_nume UNIQUE(nume_job)
+);
+
+DROP TABLE job;
+DESC job;
+
+INSERT INTO job(id_job,nume_job,salariu_minim) VALUES(id_generator.NEXTVAL,'Manager',15000);
+INSERT INTO job(id_job,nume_job,salariu_minim) VALUES(id_generator.NEXTVAL,'Pilot',5000);
+INSERT INTO job(id_job,nume_job,salariu_minim) VALUES(id_generator.NEXTVAL,'Dispecer_zbor',8500);
+INSERT INTO job(id_job,nume_job,salariu_minim) VALUES(id_generator.NEXTVAL,'Tehnician',8700);
+INSERT INTO job(id_job,nume_job,salariu_minim) VALUES(id_generator.NEXTVAL,'Copilot',4000);
+INSERT INTO job(id_job,nume_job) VALUES(id_generator.NEXTVAL,'Casier');
+INSERT INTO job(id_job,nume_job) VALUES(id_generator.NEXTVAL,'Agent_servicii');
+
+
+SELECT * FROM job;
+
+CREATE TABLE locatie(
+id_locatie NUMBER(4),
+nume_locatie VARCHAR2(30) NOT NULL,
+CONSTRAINT pk_locatie PRIMARY KEY(id_locatie)
+);
+
+DROP TABLE locatie;
+DESC locatie;
+
+INSERT INTO locatie(id_locatie,nume_locatie) VALUES(id_generator.NEXTVAL,'Bucuresti');
+INSERT INTO locatie(id_locatie,nume_locatie) VALUES(id_generator.NEXTVAL,'Cluj-Napoca');
+INSERT INTO locatie(id_locatie,nume_locatie) VALUES(id_generator.NEXTVAL,'Amsterdam');
+INSERT INTO locatie(id_locatie,nume_locatie) VALUES(id_generator.NEXTVAL,'Paris');
+INSERT INTO locatie(id_locatie,nume_locatie) VALUES(id_generator.NEXTVAL,'Roma');
+
+SELECT * FROM locatie;
+
+CREATE TABLE aeroport(
+id_aeroport NUMBER(4),
+nume VARCHAR2(40) NOT NULL,
+id_locatie NUMBER(4) NOT NULL,
+CONSTRAINT pk_aeroport PRIMARY KEY(id_aeroport),
+CONSTRAINT fk_locatie_aeroport FOREIGN KEY(id_locatie) REFERENCES locatie(id_locatie)
+);
+
+DROP TABLE aeroport;
+DESC aeroport;
+
+INSERT INTO aeroport(id_aeroport, nume, id_locatie) VALUES(id_generator.NEXTVAL,'Cluj-Napoca Aeroport', (SELECT id_locatie
+FROM locatie
+WHERE nume_locatie='Cluj-Napoca'));
+
+INSERT INTO aeroport(id_aeroport, nume, id_locatie) VALUES(id_generator.NEXTVAL,'Cluj-Napoca Zboruri', (SELECT id_locatie
+FROM locatie
+WHERE nume_locatie='Cluj-Napoca'));
+
+INSERT INTO aeroport(id_aeroport, nume, id_locatie) VALUES(id_generator.NEXTVAL,'Aeroportul International Henri Coanda', (SELECT id_locatie
+FROM locatie
+WHERE nume_locatie='Bucuresti'));
+
+INSERT INTO aeroport(id_aeroport, nume, id_locatie) VALUES(id_generator.NEXTVAL,'Amsterdam Flights', (SELECT id_locatie
+FROM locatie
+WHERE nume_locatie='Amsterdam'));
+
+INSERT INTO aeroport(id_aeroport, nume, id_locatie) VALUES(id_generator.NEXTVAL,'Aeroportul Otopeni', (SELECT id_locatie
+FROM locatie
+WHERE nume_locatie='Bucuresti'));
+
+INSERT INTO aeroport(id_aeroport, nume, id_locatie) VALUES(id_generator.NEXTVAL,'Noul Aeroport Cotroceni', (SELECT id_locatie
+FROM locatie
+WHERE nume_locatie='Bucuresti'));
+
+INSERT INTO aeroport(id_aeroport, nume, id_locatie) VALUES(id_generator.NEXTVAL,'Aeroport Eiffel', (SELECT id_locatie
+FROM locatie
+WHERE nume_locatie='Paris'));
+
+INSERT INTO aeroport(id_aeroport, nume, id_locatie) VALUES(id_generator.NEXTVAL,'Rome Airport', (SELECT id_locatie FROM locatie WHERE nume_locatie='Roma'));
+
+SELECT * FROM aeroport;
+
+CREATE TABLE angajat(
+id_angajat NUMBER(4),
+nume VARCHAR2(20) NOT NULL,
+prenume VARCHAR2(20) NOT NULL,
+email varchar2(30) NOT NULL,
+data_angajarii DATE DEFAULT SYSDATE,
+id_job NUMBER(4),
+id_aeroport NUMBER(4),
+salariu NUMBER(7),
+CONSTRAINT pk_angajat PRIMARY KEY(id_angajat),
+CONSTRAINT fk_job_angajat FOREIGN KEY(id_job) REFERENCES job(id_job),
+CONSTRAINT fk_aeroport_angajat FOREIGN KEY(id_aeroport) REFERENCES aeroport(id_aeroport),
+CONSTRAINT uq_email UNIQUE(email)
+);
+
+
+DROP TABLE angajat;
+DESC angajat;
+
+
+INSERT INTO angajat(id_angajat,nume,prenume,email,salariu) VALUES(id_generator.NEXTVAL,'Popescu','Ion','popescu.ion@yahoo.com',4000);
+INSERT INTO angajat(id_angajat,nume,prenume,email,data_angajarii,salariu) VALUES(id_generator.NEXTVAL,'Ionescu','Alexandru','alnescu@yahoo.com',TO_DATE('09-02-2010','dd-mm-yyyy'),5000);
+INSERT INTO angajat(id_angajat,nume,prenume,email,data_angajarii,id_job,id_aeroport,salariu) 
+VALUES(id_generator.NEXTVAL,'Georgescu','Alina','georgescualina@yahoo.com',TO_DATE('10-10-2003','dd-mm-yyyy'),(SELECT id_job
+FROM job
+WHERE nume_job='Pilot'),13,5000);
+
+INSERT INTO angajat(id_angajat,nume,prenume,email,data_angajarii,id_job,id_aeroport,salariu) 
+VALUES(id_generator.NEXTVAL,'Munteanu','George','georgemtn@yahoo.com',TO_DATE('20-04-2005','dd-mm-yyyy'),(SELECT id_job
+FROM job
+WHERE nume_job='Manager'),14,23000);
+
+INSERT INTO angajat(id_angajat,nume,prenume,email,data_angajarii,id_job,id_aeroport,salariu) 
+VALUES(id_generator.NEXTVAL,'Barbu','Andrei','eduard.barbu@yahoo.com',TO_DATE('02-09-2003','dd-mm-yyyy'),(SELECT id_job
+FROM job
+WHERE nume_job='Manager'),15,15000);
+
+INSERT INTO angajat(id_angajat, nume, prenume, email, id_aeroport, id_job) VALUES(id_generator.NEXTVAL,'Andurnache', 'Alexandru','aalexandru@yahoo.com', 
+(SELECT id_aeroport FROM aeroport WHERE nume='Aeroportul International Henri Coanda'),
+(SELECT id_job
+FROM job
+WHERE nume_job='Copilot'));
+
+INSERT INTO angajat(id_angajat, nume, prenume, email, id_aeroport, id_job) VALUES(id_generator.NEXTVAL,'Alexandru', 'Andrei','andalexandru@yahoo.com', (SELECT id_aeroport FROM aeroport WHERE nume='Aeroportul Otopeni'),(SELECT id_job
+FROM job
+WHERE nume_job='Copilot'));
+
+INSERT INTO angajat(id_angajat, nume, prenume, email, id_aeroport, id_job) VALUES(id_generator.NEXTVAL,'Andrei', 'Marcel','andreimarcel@yahoo.com', (SELECT id_aeroport FROM aeroport WHERE nume='Aeroportul Otopeni'),(SELECT id_job
+FROM job
+WHERE nume_job='Copilot'));
+
+INSERT INTO angajat(id_angajat, nume, prenume, email, id_aeroport, salariu) VALUES(300,'Popescu','George','popgeorge@gmail.com',(SELECT id_aeroport FROM aeroport WHERE nume='Aeroportul Otopeni'),7000);
+INSERT INTO angajat(id_angajat, nume, prenume, email, id_aeroport, salariu) VALUES(301,'Popescu','Ana','popanag@gmail.com',(SELECT id_aeroport FROM aeroport WHERE nume='Aeroportul Otopeni'),8000);
+INSERT INTO angajat(id_angajat, nume, prenume, email, id_aeroport, id_job, salariu) VALUES(302,'Popescu','Gheorghe','popgeorge1@gmail.com',(SELECT id_aeroport FROM aeroport WHERE nume='Aeroportul Otopeni'),(SELECT id_job
+FROM job
+WHERE nume_job='Copilot'),7000);
+
+
+SELECT * FROM angajat;
+
+
+CREATE TABLE campanie(
+id_campanie NUMBER(4),
+data_start DATE NOT NULL,
+data_sfarsit DATE NOT NULL,
+beneficii varchar2(25) DEFAULT 'Promovare Firma',
+CONSTRAINT pk_campanie PRIMARY KEY(id_campanie),
+CONSTRAINT chq_data CHECK(data_start+20<data_sfarsit)
+);
+
+DESC campanie;
+DROP TABLE campanie;
+
+INSERT INTO campanie(id_campanie,data_start,data_sfarsit) VALUES(id_generator_1.NEXTVAL,TO_DATE('24-08-2012','dd-mm-yyyy'),TO_DATE('25-09-2012','dd-mm-yyyy'));
+INSERT INTO campanie(id_campanie,data_start,data_sfarsit) VALUES(id_generator_1.NEXTVAL,TO_DATE('24-08-2005','dd-mm-yyyy'),TO_DATE('25-09-2006','dd-mm-yyyy'));
+INSERT INTO campanie(id_campanie,data_start,data_sfarsit,beneficii) VALUES(id_generator_1.NEXTVAL,TO_DATE('13-12-2013','dd-mm-yyyy'),TO_DATE('01-03-2014','dd-mm-yyyy'),'Reducere Bilete');
+INSERT INTO campanie(id_campanie,data_start,data_sfarsit,beneficii) VALUES(id_generator_1.NEXTVAL,TO_DATE('24-08-2012','dd-mm-yyyy'),TO_DATE('25-09-2012','dd-mm-yyyy'),'Reducere Bilete');
+INSERT INTO campanie(id_campanie,data_start,data_sfarsit) VALUES(id_generator_1.NEXTVAL,TO_DATE('02-01-2020','dd-mm-yyyy'),TO_DATE('04-04-2021','dd-mm-yyyy'));
+
+SELECT * FROM campanie;
+
+CREATE TABLE certificat(
+id_certificat NUMBER(4),
+data_primirii DATE NOT NULL,
+id_angajat NUMBER(4) NOT NULL,
+id_campanie NUMBER(4) NOT NULL,
+CONSTRAINT pk_certificat PRIMARY KEY(id_certificat),
+CONSTRAINT fk_certificat_angajat FOREIGN KEY(id_angajat) REFERENCES angajat(id_angajat),
+CONSTRAINT fk_certificat_campanie FOREIGN KEY(id_campanie) REFERENCES campanie(id_campanie)
+);
+
+DESC certificat;
+DROP TABLE certificat;
+INSERT INTO certificat(id_certificat,data_primirii,id_angajat,id_campanie) VALUES(id_generator.NEXTVAL,TO_DATE('10-10-2004','dd-mm-yyyy'),(SELECT id_angajat
+                                                                                                                               FROM angajat
+                                                                                                                               WHERE nume='Barbu'
+                                                                                                                               AND prenume='Andrei'),5
+                                                                                                                               );
+INSERT INTO certificat(id_certificat,data_primirii,id_angajat,id_campanie) VALUES(id_generator.NEXTVAL,TO_DATE('10-10-2005','dd-mm-yyyy'),(SELECT id_angajat
+                                                                                                                               FROM angajat
+                                                                                                                               WHERE nume='Barbu'
+                                                                                                                               AND prenume='Andrei'),5
+                                                                                                                               );
+INSERT INTO certificat(id_certificat,data_primirii,id_angajat,id_campanie) VALUES(id_generator.NEXTVAL,TO_DATE('10-10-2006','dd-mm-yyyy'),(SELECT id_angajat
+                                                                                                                               FROM angajat
+                                                                                                                               WHERE nume='Barbu'
+                                                                                                                               AND prenume='Andrei'),5
+                                                                                                                               );
+INSERT INTO certificat(id_certificat,data_primirii,id_angajat,id_campanie) VALUES(id_generator.NEXTVAL,TO_DATE('25-08-2011','dd-mm-yyyy'),(SELECT id_angajat
+                                                                                                                               FROM angajat
+                                                                                                                               WHERE nume='Munteanu'
+                                                                                                                               AND prenume='George'),5
+                                                                                                                               );
+INSERT INTO certificat(id_certificat,data_primirii,id_angajat,id_campanie) VALUES(id_generator.NEXTVAL,TO_DATE('12-07-2012','dd-mm-yyyy'),(SELECT id_angajat
+                                                                                                                               FROM angajat
+                                                                                                                               WHERE nume='Popescu'
+                                                                                                                               AND prenume='Ion'),5
+                                                                                                                               );
+SELECT * FROM certificat;
+
+CREATE TABLE pasager(
+CNP char(13),
+nume varchar2(20),
+prenume varchar2(20),
+email varchar2(40),
+CONSTRAINT pk_pasager PRIMARY KEY(CNP),
+CONSTRAINT uq_email_pasager UNIQUE(EMAIL)
+);
+
+DESC pasager;
+DROP table pasager;
+
+INSERT INTO pasager(CNP) VALUES('5030802385555');
+INSERT INTO pasager(CNP,nume,prenume) VALUES('5030902385554','Talmaciu', 'Marian');
+INSERT INTO pasager(CNP,nume,prenume) VALUES('5041002385553', 'Popescu' , 'Eduard');
+INSERT INTO pasager(CNP,nume,prenume,email) VALUES('5120897385552' , 'Eftimie' ,'Andrei', 'efandr@yahoo.com');
+INSERT INTO pasager(CNP,nume,prenume,email) VALUES('5110805385551','Eftimie', 'Gabriel', 'efgabriel@yahoo.com');
+
+SELECT * from pasager;
+
+CREATE TABLE abonament(
+id_abonament NUMBER(4),
+puncte NUMBER(5) DEFAULT 0,
+CNP CHAR(13) NOT NULL,
+CONSTRAINT pk_abonament PRIMARY KEY(id_abonament),
+CONSTRAINT fk_abonament_pasager FOREIGN KEY(CNP) REFERENCES pasager(CNP),
+CONSTRAINT uq_abonament UNIQUE(CNP),
+CONSTRAINT cq_puncte CHECK(puncte>=0)
+);
+
+DESC abonament;
+DROP table abonament;
+
+INSERT INTO abonament(id_abonament, CNP) VALUES(id_generator.NEXTVAL,'5030902385554');
+INSERT INTO abonament(id_abonament, CNP) VALUES(id_generator.NEXTVAL,'5030802385555');
+INSERT INTO abonament(id_abonament, CNP) VALUES(id_generator.NEXTVAL,'5041002385553');
+INSERT INTO abonament(id_abonament, CNP) VALUES(id_generator.NEXTVAL,'5120897385552');
+INSERT INTO abonament(id_abonament, puncte, CNP) VALUES(id_generator.NEXTVAL,40,'5110805385551');
+
+SELECT * FROM abonament;
+
+CREATE TABLE model_avion(
+tip_avion varchar2(25) NOT NULL,
+intretinere NUMBER(5) DEFAULT 1000,
+nr_locuri NUMBER(5) NOT NULL,
+CONSTRAINT pk_model_avion PRIMARY KEY(tip_avion),
+CONSTRAINT chq_locuri CHECK(nr_locuri>10),
+CONSTRAINT cq_intretinere CHECK(intretinere>=100)
+);
+
+DESC model_avion;
+DROP table model_avion;
+
+INSERT INTO model_avion(tip_avion,nr_locuri) VALUES('F777',100);
+INSERT INTO model_avion(tip_avion,nr_locuri) VALUES('Boeing 757',150);
+INSERT INTO model_avion(tip_avion,nr_locuri,intretinere) VALUES('Airbus A320',200,500);
+INSERT INTO model_avion(tip_avion,nr_locuri,intretinere) VALUES('Airbus A120',200,1500);
+INSERT INTO model_avion(tip_avion,nr_locuri,intretinere) VALUES('Boeing 717',200,1200);
+
+
+SELECT * FROM model_avion;
+
+CREATE TABLE avion(
+id_avion NUMBER(4),
+data_reviziei DATE DEFAULT SYSDATE,
+tip_avion varchar2(25),
+CONSTRAINT pk_avion PRIMARY KEY (id_avion),
+CONSTRAINT fk_avion FOREIGN KEY (tip_avion) REFERENCES model_avion(tip_avion) 
+);
+
+DESC avion;
+DROP table avion;
+
+INSERT INTO avion(id_avion,data_reviziei,tip_avion) VALUES(id_generator_2.NEXTVAL,TO_DATE('09-09-2017','dd-mm-yyyy'),'F777');
+INSERT INTO avion(id_avion,data_reviziei,tip_avion) VALUES(id_generator_2.NEXTVAL,TO_DATE('09-09-2017','dd-mm-yyyy'),'F777');
+INSERT INTO avion(id_avion,data_reviziei,tip_avion) VALUES(id_generator_2.NEXTVAL,TO_DATE('08-09-2016','dd-mm-yyyy'),'Boeing 717');
+INSERT INTO avion(id_avion,data_reviziei,tip_avion) VALUES(id_generator_2.NEXTVAL,TO_DATE('07-11-2018','dd-mm-yyyy'),'Boeing 757');
+INSERT INTO avion(id_avion,data_reviziei,tip_avion) VALUES(id_generator_2.NEXTVAL,TO_DATE('12-12-2017','dd-mm-yyyy'),'Airbus A120');
+INSERT INTO avion(id_avion,data_reviziei,tip_avion) VALUES(id_generator_2.NEXTVAL,TO_DATE('27-10-2020','dd-mm-yyyy'),'Airbus A320');
+INSERT INTO avion(id_avion,data_reviziei,tip_avion) VALUES(id_generator_2.NEXTVAL,TO_DATE('09-SEP-2021','dd-mm-yyyy'),'F777');
+
+SELECT * FROM avion;
+
+CREATE TABLE calatorie(
+id_calatorie NUMBER(4),
+durata_ore NUMBER(5,2) DEFAULT 2,
+data_plecarii DATE DEFAULT SYSDATE,
+id_aeroport NUMBER(4),
+CONSTRAINT pk_calatorie PRIMARY KEY(id_calatorie),
+CONSTRAINT fk_calatorie FOREIGN KEY(id_aeroport) REFERENCES aeroport(id_aeroport),
+CONSTRAINT cq_durata CHECK(durata_ore>0)
+);
+
+DESC calatorie;
+DROP TABLE calatorie;
+
+SELECT * FROM AEROPORT;
+
+(SELECT id_aeroport
+FROM aeroport
+WHERE nume='Aeroportul Otopeni');
+
+INSERT INTO calatorie(id_calatorie,durata_ore,data_plecarii,id_aeroport) VALUES(id_generator_3.NEXTVAL,2.5,TO_DATE('02-09-2021','dd-mm-yyyy'),(SELECT id_aeroport
+FROM aeroport
+WHERE nume='Cluj-Napoca Aeroport'));
+INSERT INTO calatorie(id_calatorie,durata_ore,data_plecarii,id_aeroport) VALUES(id_generator_3.NEXTVAL,3,TO_DATE('09-02-2021','dd-mm-yyyy'),(SELECT id_aeroport
+FROM aeroport
+WHERE nume='Cluj-Napoca Zboruri'));
+INSERT INTO calatorie(id_calatorie,data_plecarii,id_aeroport) VALUES(id_generator_3.NEXTVAL,TO_DATE('03-07-2020','dd-mm-yyyy'),(SELECT id_aeroport
+FROM aeroport
+WHERE nume='Cluj-Napoca Zboruri'));
+INSERT INTO calatorie(id_calatorie,data_plecarii,id_aeroport) VALUES(id_generator_3.NEXTVAL,TO_DATE('05-03-2019','dd-mm-yyyy'),(SELECT id_aeroport
+FROM aeroport
+WHERE nume='Aeroportul International Henri Coanda'));
+INSERT INTO calatorie(id_calatorie,data_plecarii,id_aeroport) VALUES(id_generator_3.NEXTVAL,TO_DATE('04-10-2018','dd-mm-yyyy'),(SELECT id_aeroport
+FROM aeroport
+WHERE nume='Amsterdam Flights'));
+INSERT INTO calatorie(id_calatorie,data_plecarii,id_aeroport) VALUES(id_generator_3.NEXTVAL,TO_DATE('17-01-2017','dd-mm-yyyy'),(SELECT id_aeroport
+FROM aeroport
+WHERE nume='Aeroportul Otopeni'));
+
+SELECT * FROM calatorie;
+
+CREATE TABLE participare(
+id_angajat NUMBER(4),
+id_campanie NUMBER(4),
+CONSTRAINT pk_participare PRIMARY KEY(id_angajat, id_campanie),
+CONSTRAINT fk_participare_angajat FOREIGN KEY(id_angajat) REFERENCES angajat(id_angajat),
+CONSTRAINT fk_participare_campanie FOREIGN KEY(id_campanie) REFERENCES campanie(id_campanie)
+);
+
+DESC participare;
+DROP TABLE participare;
+
+INSERT INTO participare(id_angajat, id_campanie) VALUES(26,4);
+INSERT INTO participare(id_angajat, id_campanie) VALUES(26,5);
+INSERT INTO participare(id_angajat, id_campanie) VALUES(26,3);
+INSERT INTO participare(id_angajat, id_campanie) VALUES(25,3);
+INSERT INTO participare(id_angajat, id_campanie) VALUES(27,5);
+INSERT INTO participare(id_angajat, id_campanie) VALUES(24,3);
+INSERT INTO participare(id_angajat, id_campanie) VALUES(28,4);
+INSERT INTO participare(id_angajat, id_campanie) VALUES(21,5);
+INSERT INTO participare(id_angajat, id_campanie) VALUES(21,1);
+INSERT INTO participare(id_angajat, id_campanie) VALUES(25,2);
+
+SELECT * FROM participare;
+
+CREATE TABLE efectuare_calatorie(
+CNP CHAR(13),
+id_avion NUMBER(4),
+id_calatorie NUMBER(4),
+CONSTRAINT pk_efectuare PRIMARY KEY(CNP,id_avion,id_calatorie),
+CONSTRAINT fk_efec_cnp FOREIGN KEY(CNP) references pasager(CNP),
+CONSTRAINT fk_efec_avion FOREIGN KEY(id_avion) references avion(id_avion),
+CONSTRAINT fk_efec_calatorie FOREIGN KEY(id_calatorie) references calatorie(id_calatorie)
+);
+
+
+
+INSERT INTO efectuare_calatorie
+(SELECT p.CNP, a.id_avion, c.id_calatorie
+FROM avion a, pasager p, calatorie c
+WHERE a.id_avion<=3
+AND c.id_calatorie<=5);
+
+SELECT * FROM efectuare_calatorie;
